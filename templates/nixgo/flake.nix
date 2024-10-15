@@ -71,6 +71,10 @@
               gotools
               go-tools
             ];
+            shellHook = ''
+              							export SHELL=$(which zsh)
+              							exec zsh
+              						'';
           };
         });
 

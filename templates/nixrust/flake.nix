@@ -40,9 +40,11 @@
           pkgs = nixpkgsFor.${system};
         in
         {
-          somename = pkgs.buildRustPackage {
+          somename = pkgs.rustPlatform.buildRustPackage {
 						pname = "somename";
+						# You can also use other versions
 						inherit version;
+						cargoLock.lockFile = ./Cargo.lock;
 						src = ./.;
 					};
         });

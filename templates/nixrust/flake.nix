@@ -58,6 +58,7 @@
 					libPath = with pkgs; lib.makeLibraryPath [
 						# load external libraries that you need in your rust project here
 					];
+					toolchain = architect.${system};
         in
         {
           default = pkgs.mkShell {
@@ -94,7 +95,7 @@
             shellHook = ''
 							export PATH=$PATH:''${CARGO_HOME:-~/.cargo}/bin
 							# Depending on your desired toolchain, you should probably change the path below
-							export PATH=$PATH:''${RUSTUP_HOME:-~/.rustup}/toolchains/$RUSTC_VERSION-${architect}/bin/
+							export PATH=$PATH:''${RUSTUP_HOME:-~/.rustup}/toolchains/$RUSTC_VERSION-${toolchain}/bin/
 							export SHELL=$(which zsh)
 							exec zsh
 						'';

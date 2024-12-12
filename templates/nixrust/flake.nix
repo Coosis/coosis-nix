@@ -9,12 +9,13 @@
 
   outputs = { self, nixpkgs }:
     let
+			cargotoml = (builtins.fromTOML (builtins.readFile ./cargo.toml));
 
       # to work with older version of flakes
       lastModifiedDate = self.lastModifiedDate or self.lastModified or "19700101";
 
-      # Generate a user-friendly version number.
-      version = builtins.substring 0 8 lastModifiedDate;
+			pname = cargotoml.package.name;
+			version = cargotoml.package.version;
 
       # System types to support.
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
@@ -40,9 +41,8 @@
           pkgs = nixpkgsFor.${system};
         in
         {
-          somename = pkgs.rustPlatform.buildRustPackage {
-						pname = "somename";
-						# You can also use other versions
+          pname = pkgs.rustPlatform.buildRustPackage {
+						inherit pname;
 						inherit version;
 						cargoLock.lockFile = ./Cargo.lock;
 						src = ./.;
@@ -107,6 +107,6 @@
       # The default package for 'nix build'. This makes sense if the
       # flake provides only one package or there is a clear "main"
       # package.
-      defaultPackage = forAllSystems (system: self.packages.${system}.somename);
+      defaultPackage = forAllSystems (system: self.packages.${system}.pname);
     };
 }

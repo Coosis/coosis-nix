@@ -39,6 +39,9 @@
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+					libPath = with pkgs; lib.makeLibraryPath [
+						# load external libraries that you need in your rust project here
+					];
         in
         {
           pname = pkgs.rustPlatform.buildRustPackage {
@@ -46,33 +49,6 @@
 						inherit version;
 						cargoLock.lockFile = ./Cargo.lock;
 						src = ./.;
-					};
-        });
-
-      # Add dependencies that are only needed for development
-      devShells = forAllSystems (system:
-        let
-          pkgs = nixpkgsFor.${system};
-					# You can create a rust-toolchain.toml file in the project directory and reference it here
-					# overrides = (builtins.fromTOML (builtins.readFile ./rust-toolchain.toml));
-					# But for now, we'll just use stable
-					overrides = { toolchain = { channel = "stable"; }; };
-					libPath = with pkgs; lib.makeLibraryPath [
-						# load external libraries that you need in your rust project here
-					];
-					toolchain = architect.${system};
-        in
-        {
-          default = pkgs.mkShell {
-            buildInputs = with pkgs; [
-							cargo
-							clang
-							# Replace llvmPackages with llvmPackages_X, where X is the latest LLVM version (at the time of writing, 16)
-							llvmPackages.bintools
-							rustup
-							rust-analyzer
-            ];
-						RUSTC_VERSION = overrides.toolchain.channel;
 
 						# https://github.com/rust-lang/rust-bindgen#environment-variables
 						LIBCLANG_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_latest.libclang.lib ];
@@ -94,6 +70,31 @@
 							# ''-I"${pkgs.glib.dev}/include/glib-2.0"''
 							# ''-I"${pkgs.glib.out}/lib/glib-2.0/include/"''
 						];
+					};
+        });
+
+      # Add dependencies that are only needed for development
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system};
+					# You can create a rust-toolchain.toml file in the project directory and reference it here
+					# overrides = (builtins.fromTOML (builtins.readFile ./rust-toolchain.toml));
+					# But for now, we'll just use stable
+					overrides = { toolchain = { channel = "stable"; }; };
+					toolchain = architect.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+							cargo
+							clang
+							# Replace llvmPackages with llvmPackages_X, where X is the latest LLVM version (at the time of writing, 16)
+							llvmPackages.bintools
+							rustup
+							rust-analyzer
+            ];
+						RUSTC_VERSION = overrides.toolchain.channel;
+
             shellHook = ''
 							export PATH=$PATH:''${CARGO_HOME:-~/.cargo}/bin
 							# Depending on your desired toolchain, you should probably change the path below

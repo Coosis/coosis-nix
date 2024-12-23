@@ -14,6 +14,10 @@ stdenv.mkDerivation {
 		sha256 = "sha256-7bKAgkbpElc7PXt9KYikV/mmeVRCGpMX6FtsTN4vvl4=";
   };
 
+	unpackPhase = ''
+		tar -xf $src
+	'';
+
 	buildPhase = ''
 		npm install
 	'';

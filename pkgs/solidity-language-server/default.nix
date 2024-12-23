@@ -11,7 +11,7 @@ stdenv.mkDerivation {
 
   src = fetchurl {
 		url = "https://registry.npmjs.org/@nomicfoundation/coc-solidity/-/coc-solidity-0.8.7.tgz";
-		sha256 = "";
+		sha256 = "sha256-7bKAgkbpElc7PXt9KYikV/mmeVRCGpMX6FtsTN4vvl4=";
   };
 
 	buildPhase = ''

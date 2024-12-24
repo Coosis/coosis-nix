@@ -1,11 +1,26 @@
 { stdenv
 , lib
 , fetchurl
+, fetchgit
+, nix-gitignore
 , nodejs
+, python2
+, pkgs
+, libtool
+, runCommand
+, writeTextFile
+, writeShellScript
 }:
+let 
+	nodeEnv = import ./node-env.nix { 
+		inherit lib stdenv nodejs python2 pkgs libtool runCommand writeTextFile writeShellScript;
+	};
+in
 let
-	nodePackages = import ./node-packages.nix { inherit nodejs; };
-  nodeEnv = import ./node-env.nix { inherit nodePackages; };
+	nodePackages = import ./node-packages.nix { 
+		nodeEnv;
+		inherit fetchurl fetchgit nix-gitignore stdenv lib;
+	};
 in
 stdenv.mkDerivation {
   pname = "solidity-language-server";

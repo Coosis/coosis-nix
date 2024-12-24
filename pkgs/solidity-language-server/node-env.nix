@@ -558,6 +558,9 @@ let
 
         # Run post install hook, if provided
         runHook postInstall
+
+				mkdir -p $out/bin
+				ln -s $out/lib/node_modules/@nomicfoundation/coc-solidity/node_modules/.bin/nomicfoundation-solidity-language-server $out/bin/solidity-language-server
       '';
 
       meta = {

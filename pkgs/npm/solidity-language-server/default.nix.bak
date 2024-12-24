@@ -18,7 +18,7 @@ let
 in
 let
 	nodePackages = import ./node-packages.nix { 
-		nodeEnv;
+		nodeEnv
 		inherit fetchurl fetchgit nix-gitignore stdenv lib;
 	};
 in

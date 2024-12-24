@@ -1,14 +1,14 @@
 { pkgs ? import <nixpkgs> { } }:
 
 let
-  vimplugins = import ./pkgs/vimplugins { inherit pkgs; };
-  templates = import ./templates { };
+  vimplugins = pkgs.callPackage ./pkgs/vimplugins { inherit pkgs; };
+  templates = pkgs.callPackage ./templates { };
 in
 {
-  alacritty = import ./pkgs/alacritty/default.nix { };
-  alacritty_darwin = import ./pkgs/alacritty/darwin-default.nix { };
-  codelldb = import ./pkgs/codelldb/default.nix { };
-	solidity-language-server = (import ./pkgs/solidity-language-server/default.nix { }).package;
+  alacritty = pkgs.callPackage ./pkgs/alacritty/default.nix { };
+  alacritty_darwin = pkgs.callPackage ./pkgs/alacritty/darwin-default.nix { };
+  codelldb = pkgs.callPackage ./pkgs/codelldb/default.nix { };
+	solidity-language-server = (pkgs.callPackage ./pkgs/npm/solidity-language-server/default.nix { }).package;
   vimplugins = vimplugins;
   templates = templates;
 }

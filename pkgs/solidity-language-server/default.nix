@@ -20,7 +20,7 @@ stdenv.mkDerivation {
 
 	buildPhase = ''
 		export NODE_ENV=production
-		npm ci
+		npm install
 	'';
 
   installPhase = ''

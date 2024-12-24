@@ -7,7 +7,7 @@ stdenv.mkDerivation {
   pname = "solidity-language-server";
   version = "0.8.7";
 
-	nativeBuildInputs = [ nodejs ];
+	buildInputs = [ nodejs ];
 
   src = fetchurl {
 		url = "https://registry.npmjs.org/@nomicfoundation/coc-solidity/-/coc-solidity-0.8.7.tgz";
@@ -15,7 +15,7 @@ stdenv.mkDerivation {
   };
 
 	unpackPhase = ''
-		tar -xf $src
+		tar -xf $src --strip-components=1
 	'';
 
 	buildPhase = ''
@@ -23,8 +23,9 @@ stdenv.mkDerivation {
 	'';
 
   installPhase = ''
+		cp -r node_modules $out/node_modules
 		mkdir -p $out/bin
-		ln -s $src/node_modules/.bin/nomicfoundation-solidity-language-server $out/bin/solidity-language-server
+		ln -s $out/node_modules/.bin/nomicfoundation-solidity-language-server $out/bin/solidity-language-server
 	'';
 
   meta = {

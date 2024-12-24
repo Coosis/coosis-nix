@@ -19,7 +19,8 @@ stdenv.mkDerivation {
 	'';
 
 	buildPhase = ''
-		npm install
+		export NODE_ENV=production
+		npm ci
 	'';
 
   installPhase = ''

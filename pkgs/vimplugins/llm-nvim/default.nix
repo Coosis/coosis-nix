@@ -6,7 +6,7 @@ vimUtils.buildVimPlugin {
     owner = "huggingface";
     repo = "llm.nvim";
     rev = "main";
-    sha256 = "0yr7i6nslkzz1gzhya5gkc7g26v5dw27403hminr799q976l3ad7";
+		sha256 = "8bJwksIEE5/K4g1akzYRWpkkTLb5bEBWwiCFC8VGfSU";
   };
 
   meta = {

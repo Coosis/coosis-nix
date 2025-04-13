@@ -1,67 +1,154 @@
-{ stdenv
-, lib
-, fetchurl
-, makeWrapper
-, unzip
-,
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  rustPlatform,
+  makeWrapper,
+  llvmPackages,
+  buildNpmPackage,
+  cmake,
+  nodejs,
+  unzip,
+  python3,
+  pkg-config,
+  libsecret,
 }:
-# assert stdenv.isLinux || stdenv.isDarwin -> "Only Linux and Darwin are supported";
+assert lib.versionAtLeast python3.version "3.5";
 let
-  system = stdenv.system;
-  binaries = {
-    "x86_64-linux" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-x86_64-linux.vsix";
-      sha256 = "1jhjs2na8cjhd4yqib1vij33094sgf6lsxg9i13f2x0rh4czyayi";
-    };
-    "aarch64-linux" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-aarch64-linux.vsix";
-      sha256 = "01kxnbj9kq6sczcqp31g6xmx4l5dm4pawyqba8vlax9lg1hzd08a";
-    };
-    "arm-linux" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-arm-linux.vsix";
-      sha256 = "1jb8mx5l06zg418qnw9v53yn4ni4yhkcg3yglfdrqdflagkmxz2b";
-    };
-    "x86_64-darwin" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-x86_64-darwin.vsix";
-      sha256 = "1kzm0hrg6ji2wjxhnsj45g49dq5kll8vb760131k8154f1b0vcci";
-    };
-    "aarch64-darwin" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-aarch64-darwin.vsix";
-      sha256 = "0hbs2rr4r8zlii3srbc9xbmn5wm3p88cdsx85xp2vibbf9d7kc2a";
-    };
+  publisher = "vadimcn";
+  pname = "vscode-lldb";
+  version = "1.10.0";
+
+  vscodeExtUniqueId = "${publisher}.${pname}";
+  vscodeExtPublisher = publisher;
+  vscodeExtName = pname;
+
+  src = fetchFromGitHub {
+    owner = "vadimcn";
+    repo = "vscode-lldb";
+    rev = "v${version}";
+    hash = "sha256-ExSS5HxDmJJtYypRYJNz7nY0D50gjoDBc4CnJMfgVw8=";
   };
+
+  # need to build a custom version of lldb and llvm for enhanced rust support
+  lldb = (import ./lldb.nix { inherit fetchFromGitHub llvmPackages; });
+
+  adapter = (
+    import ./adapter.nix {
+      inherit
+        lib
+        lldb
+        makeWrapper
+        rustPlatform
+        stdenv
+
+        pname
+        src
+        version
+        ;
+    }
+  );
+
+  nodeDeps = (
+    import ./node_deps.nix {
+      inherit
+        buildNpmPackage
+        libsecret
+        pkg-config
+        python3
+
+        pname
+        src
+        version
+        ;
+    }
+  );
 
 in
 stdenv.mkDerivation {
-  pname = "codelldb";
-  version = "1.10.0";
+  pname = "vscode-extension-${publisher}-${pname}";
+  inherit
+    src
+    version
+    vscodeExtUniqueId
+    vscodeExtPublisher
+    vscodeExtName
+    ;
 
-  nativeBuildInputs = [ unzip makeWrapper ];
+  installPrefix = "share/vscode/extensions/${vscodeExtUniqueId}";
 
-  src = fetchurl {
-    url = binaries.${system}.url;
-    sha256 = binaries.${system}.sha256;
-  };
+  nativeBuildInputs = [
+    cmake
+    makeWrapper
+    nodejs
+    unzip
+  ];
 
-  unpackPhase = ''
-    		mkdir -p $out/bin
-    		unzip $src -d $out
-    		'';
+  patches = [ ./patches/cmake-build-extension-only.patch ];
+
+  postPatch = ''
+    # temporary patch for forgotten version updates
+    substituteInPlace CMakeLists.txt \
+      --replace-fail "1.9.2" ${version}
+  '';
+
+  postConfigure =
+    ''
+      cp -r ${nodeDeps}/lib/node_modules .
+    ''
+    + lib.optionalString stdenv.hostPlatform.isDarwin ''
+      export HOME="$TMPDIR/home"
+      mkdir $HOME
+    '';
+
+  cmakeFlags = [
+    # Do not append timestamp to version.
+    "-DVERSION_SUFFIX="
+  ];
+  makeFlags = [ "vsix_bootstrap" ];
+
+  preBuild = lib.optionalString stdenv.hostPlatform.isDarwin ''
+    export HOME=$TMPDIR
+  '';
 
   installPhase = ''
-    # ln -s $out/extension/adapter/codelldb $out/bin/codelldb
-    # chmod +x $out/extension/adapter/codelldb
-    			makeWrapper $out/extension/adapter/codelldb $out/bin/codelldb \
-    			--set LD_LIBRARY_PATH $out/extension/lldb/lib \
-    			--set DYLD_LIBRARY_PATH $out/extension/lldb/lib
-    			chmod +x $out/bin/codelldb
-    			'';
+    ext=$out/$installPrefix
+    runHook preInstall
+
+    unzip ./codelldb-bootstrap.vsix 'extension/*' -d ./vsix-extracted
+
+    mkdir -p $ext/{adapter,formatters}
+    mv -t $ext vsix-extracted/extension/*
+    cp -t $ext/ -r ${adapter}/share/*
+    wrapProgram $ext/adapter/codelldb \
+      --prefix LD_LIBRARY_PATH : "$ext/lldb/lib" \
+      --set-default LLDB_DEBUGSERVER_PATH "${adapter.lldbServer}"
+    # Mark that all components are installed.
+    touch $ext/platform.ok
+
+    mkdir -p $out/bin
+    ln -s $ext/adapter/codelldb $out/bin/codelldb
+
+    runHook postInstall
+  '';
+
+  # `adapter` will find python binary and libraries at runtime.
+  postFixup = ''
+    wrapProgram $out/$installPrefix/adapter/codelldb \
+      --prefix PATH : "${python3}/bin" \
+      --prefix LD_LIBRARY_PATH : "${python3}/lib"
+  '';
+
+  passthru = {
+    inherit lldb adapter;
+    updateScript = ./update.sh;
+  };
 
   meta = {
-    description = "CodeLLDB executable, solely for use with nvim-dap plugin of neovim";
+    description = "Native debugger extension for VSCode based on LLDB";
     homepage = "https://github.com/vadimcn/vscode-lldb";
-    license = lib.licenses.mit;
-    platforms = lib.platforms.linux ++ lib.platforms.darwin;
+    license = [ lib.licenses.mit ];
+    maintainers = [ lib.maintainers.r4v3n6101 ];
+    platforms = lib.platforms.all;
   };
 }
-

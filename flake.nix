@@ -38,6 +38,7 @@
             darwinExtra;
           vimplugins = pkgs.callPackage ./pkgs/vimplugins/default.nix { };
           codelldb = pkgs.callPackage ./pkgs/codelldb/default.nix { };
+          v = pkgs.callPackage ./pkgs/v/default.nix { };
 					solidity-language-server = (pkgs.callPackage ./pkgs/npm/solidity-language-server/default.nix { }).package;
         });
       templates = import ./templates { };

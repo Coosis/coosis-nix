@@ -1,24 +1,15 @@
-{
-  buildNpmPackage,
+{ buildNpmPackage,
 
-  libsecret,
-  python3,
-  pkg-config,
+libsecret, python3, pkg-config,
 
-  pname,
-  src,
-  version,
-}:
+pname, src, version, }:
 buildNpmPackage {
   pname = "${pname}-node-deps";
   inherit version src;
 
   npmDepsHash = "sha256-fMKGi+AJTMlWl7SQtZ21hUwOLgqlFYDhwLvEergQLfI=";
 
-  nativeBuildInputs = [
-    python3
-    pkg-config
-  ];
+  nativeBuildInputs = [ python3 pkg-config ];
 
   buildInputs = [ libsecret ];
 

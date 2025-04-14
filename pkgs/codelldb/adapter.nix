@@ -1,25 +1,15 @@
-{
-  lib,
-  lldb,
-  makeWrapper,
-  rustPlatform,
-  stdenv,
+{ lib, lldb, makeWrapper, rustPlatform, stdenv,
 
-  pname,
-  src,
-  version,
-}:
+pname, src, version, }:
 let
   # debugservers on macOS require the 'com.apple.security.cs.debugger'
   # entitlement which nixpkgs' lldb-server does not yet provide; see
   # <https://github.com/NixOS/nixpkgs/pull/38624> for details
-  lldbServer =
-    if stdenv.hostPlatform.isDarwin then
-      "/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/Resources/debugserver"
-    else
-      "${lldb.out}/bin/lldb-server";
-in
-rustPlatform.buildRustPackage {
+  lldbServer = if stdenv.hostPlatform.isDarwin then
+    "/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Versions/A/Resources/debugserver"
+  else
+    "${lldb.out}/bin/lldb-server";
+in rustPlatform.buildRustPackage {
   pname = "${pname}-adapter";
   inherit version src;
 
@@ -30,16 +20,15 @@ rustPlatform.buildRustPackage {
 
   nativeBuildInputs = [ makeWrapper ];
 
-  env = lib.optionalAttrs stdenv.hostPlatform.isDarwin { NIX_LDFLAGS = "-llldb -lc++abi"; };
+  env = lib.optionalAttrs stdenv.hostPlatform.isDarwin {
+    NIX_LDFLAGS = "-llldb -lc++abi";
+  };
 
   buildAndTestSubdir = "adapter";
 
   buildFeatures = [ "weak-linkage" ];
 
-  cargoBuildFlags = [
-    "--lib"
-    "--bin=codelldb"
-  ];
+  cargoBuildFlags = [ "--lib" "--bin=codelldb" ];
 
   postFixup = ''
     mkdir -p $out/share/{adapter,formatters}

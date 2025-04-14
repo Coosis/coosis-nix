@@ -8,6 +8,11 @@ inputs = {
     coosis-nix.url = "github:Coosis/coosis-nix";
 };
 ```
+For non-flake setups:
+```bash
+nix-channel --add https://github.com/Coosis/coosis-nix/archive/main.tar.gz coosisnix
+nix-channel --update
+```
 
 Getting the packages for your specific system:
 ```nix

@@ -1,25 +1,8 @@
-{ lib
-, fetchFromGitHub
-, rustPlatform
-, nixosTests
+{ lib, fetchFromGitHub, rustPlatform, nixosTests
 
-, cmake
-, installShellFiles
-, makeWrapper
-, ncurses
-, pkg-config
-, python3
-, scdoc
+, cmake, installShellFiles, makeWrapper, ncurses, pkg-config, python3, scdoc
 
-, expat
-, fontconfig
-, freetype
-, libGL
-, xorg
-, libxkbcommon
-, wayland
-, xdg-utils
-}:
+, expat, fontconfig, freetype, libGL, xorg, libxkbcommon, wayland, xdg-utils }:
 let
   rpathLibs = [
     expat
@@ -35,8 +18,7 @@ let
     libxkbcommon
     wayland
   ];
-in
-rustPlatform.buildRustPackage rec {
+in rustPlatform.buildRustPackage rec {
   pname = "alacritty";
   version = "0.13.2";
 
@@ -49,15 +31,8 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-7HPTELRlmyjj7CXNbgqrzxW548BgbxybWi+tT3rOCX0=";
 
-  nativeBuildInputs = [
-    cmake
-    installShellFiles
-    makeWrapper
-    ncurses
-    pkg-config
-    python3
-    scdoc
-  ];
+  nativeBuildInputs =
+    [ cmake installShellFiles makeWrapper ncurses pkg-config python3 scdoc ];
 
   buildInputs = rpathLibs;
 
@@ -70,36 +45,34 @@ rustPlatform.buildRustPackage rec {
 
   checkFlags = [ "--skip=term::test::mock_term" ]; # broken on aarch64
 
-  postInstall = (
-    ''
-        install -D extra/linux/Alacritty.desktop -t $out/share/applications/
-        install -D extra/linux/org.alacritty.Alacritty.appdata.xml -t $out/share/appdata/
-        install -D extra/logo/compat/alacritty-term.svg $out/share/icons/hicolor/scalable/apps/Alacritty.svg
+  postInstall = (''
+      install -D extra/linux/Alacritty.desktop -t $out/share/applications/
+      install -D extra/linux/org.alacritty.Alacritty.appdata.xml -t $out/share/appdata/
+      install -D extra/logo/compat/alacritty-term.svg $out/share/icons/hicolor/scalable/apps/Alacritty.svg
 
-        # patchelf generates an ELF that binutils' "strip" doesn't like:
-        #    strip: not enough room for program headers, try linking with -N
-        # As a workaround, strip manually before running patchelf.
-        $STRIP -S $out/bin/alacritty
+      # patchelf generates an ELF that binutils' "strip" doesn't like:
+      #    strip: not enough room for program headers, try linking with -N
+      # As a workaround, strip manually before running patchelf.
+      $STRIP -S $out/bin/alacritty
 
-        patchelf --add-rpath "${lib.makeLibraryPath rpathLibs}" $out/bin/alacritty
-      installShellCompletion --zsh extra/completions/_alacritty
-      installShellCompletion --bash extra/completions/alacritty.bash
-      installShellCompletion --fish extra/completions/alacritty.fish
+      patchelf --add-rpath "${lib.makeLibraryPath rpathLibs}" $out/bin/alacritty
+    installShellCompletion --zsh extra/completions/_alacritty
+    installShellCompletion --bash extra/completions/alacritty.bash
+    installShellCompletion --fish extra/completions/alacritty.fish
 
-      install -dm 755 "$out/share/man/man1"
-      install -dm 755 "$out/share/man/man5"
+    install -dm 755 "$out/share/man/man1"
+    install -dm 755 "$out/share/man/man5"
 
-      scdoc < extra/man/alacritty.1.scd | gzip -c > $out/share/man/man1/alacritty.1.gz
-      scdoc < extra/man/alacritty-msg.1.scd | gzip -c > $out/share/man/man1/alacritty-msg.1.gz
-      scdoc < extra/man/alacritty.5.scd | gzip -c > $out/share/man/man5/alacritty.5.gz
-      scdoc < extra/man/alacritty-bindings.5.scd | gzip -c > $out/share/man/man5/alacritty-bindings.5.gz
+    scdoc < extra/man/alacritty.1.scd | gzip -c > $out/share/man/man1/alacritty.1.gz
+    scdoc < extra/man/alacritty-msg.1.scd | gzip -c > $out/share/man/man1/alacritty-msg.1.gz
+    scdoc < extra/man/alacritty.5.scd | gzip -c > $out/share/man/man5/alacritty.5.gz
+    scdoc < extra/man/alacritty-bindings.5.scd | gzip -c > $out/share/man/man5/alacritty-bindings.5.gz
 
-      install -dm 755 "$terminfo/share/terminfo/a/"
-      tic -xe alacritty,alacritty-direct -o "$terminfo/share/terminfo" extra/alacritty.info
-      mkdir -p $out/nix-support
-      echo "$terminfo" >> $out/nix-support/propagated-user-env-packages
-    ''
-  );
+    install -dm 755 "$terminfo/share/terminfo/a/"
+    tic -xe alacritty,alacritty-direct -o "$terminfo/share/terminfo" extra/alacritty.info
+    mkdir -p $out/nix-support
+    echo "$terminfo" >> $out/nix-support/propagated-user-env-packages
+  '');
 
   dontPatchELF = true;
 
@@ -112,6 +85,7 @@ rustPlatform.buildRustPackage rec {
     mainProgram = "alacritty";
     maintainers = with maintainers; [ Br1ght0ne mic92 ];
     platforms = platforms.unix;
-    changelog = "https://github.com/alacritty/alacritty/blob/v${version}/CHANGELOG.md";
+    changelog =
+      "https://github.com/alacritty/alacritty/blob/v${version}/CHANGELOG.md";
   };
 }

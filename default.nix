@@ -9,6 +9,9 @@ in {
   codelldb = pkgs.callPackage ./pkgs/codelldb/default.nix {
     llvmPackages = pkgs.llvmPackages_14;
   };
+  codelldb_darwin = pkgs.callPackage ./pkgs/codelldb/darwin-default.nix {
+    llvmPackages = pkgs.llvmPackages_14;
+  };
   solidity-language-server =
     (pkgs.callPackage ./pkgs/npm/solidity-language-server/default.nix
       { }).package;

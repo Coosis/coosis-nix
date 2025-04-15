@@ -29,14 +29,17 @@
           } else
             { };
         in {
-          alacritty = pkgs.callPackage (if isDarwin system then
+          alacritty = (if isDarwin system then
             ./pkgs/alacritty/darwin-default.nix
           else
             ./pkgs/alacritty/default.nix) darwinExtra;
           vimplugins = pkgs.callPackage ./pkgs/vimplugins/default.nix { };
-          codelldb = pkgs.callPackage ./pkgs/codelldb/default.nix {
-            llvmPackages = pkgs.llvmPackages_14;
-          };
+          codelldb = (if isDarwin system then
+            (pkgs.callPackage ./pkgs/codelldb/darwin-default.nix { })
+          else
+            (pkgs.callPackage ./pkgs/codelldb/default.nix {
+              llvmPackages = pkgs.llvmPackages_14;
+            }));
           solidity-language-server =
             (pkgs.callPackage ./pkgs/npm/solidity-language-server/default.nix
               { }).package;

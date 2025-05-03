@@ -36,7 +36,11 @@
         let pkgs = nixpkgsFor.${system};
         in {
           default = pkgs.mkShell {
-            buildInputs = with pkgs; [ texliveFull texlivePackages.xstring ];
+            buildInputs = with pkgs;
+              [
+                (pkgs.texliveMedium.withPackages
+                  (ps: with ps; [ xecjk needspace ctex enumitem ]))
+              ];
             shellHook = ''
               export SHELL=$(which zsh)
               exec zsh

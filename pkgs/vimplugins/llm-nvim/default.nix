@@ -5,7 +5,7 @@ vimUtils.buildVimPlugin {
   src = fetchFromGitHub {
     owner = "huggingface";
     repo = "llm.nvim";
-    rev = "main";
+    rev = "ce69731ba3f8d3ea8bc4c8f58c74c2f9ea0b33de";
     sha256 = "sha256-8bJwksIEE5/K4g1akzYRWpkkTLb5bEBWwiCFC8VGfSU=";
   };
 

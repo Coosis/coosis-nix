@@ -5,7 +5,7 @@ vimUtils.buildVimPlugin {
   src = fetchFromGitHub {
     owner = "darrikonn";
     repo = "vim-gofmt";
-    rev = "master";
+    rev = "cea5b06b2c2646ced49a64f006be2edb42645dd1";
     sha256 = "BBL65NRDDxJNdOQ/vwknqXyZ5Er4T5hAQXh2FolGPws=";
   };
 

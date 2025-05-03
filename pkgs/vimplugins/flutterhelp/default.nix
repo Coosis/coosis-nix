@@ -5,7 +5,7 @@ vimUtils.buildVimPlugin {
   src = fetchFromGitHub {
     owner = "Coosis";
     repo = "flutterhelp.nvim";
-    rev = "main";
+    rev = "b8b1f2f0f2d7e171ca4bf538b7fc0914a7895cff";
     sha256 = "1673ajgn4bpwc2sz623prvj7qfcl8gxy3a2zad0d7j3ygfifp8zn";
   };
 

@@ -34,9 +34,10 @@
         let pkgs = nixpkgsFor.${system};
         in {
           default = pkgs.mkShell {
-            buildInputs = with pkgs; [
+            buildInputs = with pkgs;
+              [
 
-            ];
+              ];
             shellHook = "	export SHELL=$(which zsh)\n	exec zsh\n";
           };
         });

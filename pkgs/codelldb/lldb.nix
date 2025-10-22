@@ -1,5 +1,5 @@
 # Patched lldb for Rust language support.
-{ fetchFromGitHub, llvmPackages, }:
+{ fetchFromGitHub, llvmPackages }:
 let
   llvmSrc = fetchFromGitHub {
     owner = "vadimcn";
@@ -10,7 +10,9 @@ let
   };
 
   lldbDrv = llvmPackages.lldb.overrideAttrs (oldAttrs: {
-    passthru = (oldAttrs.passthru or { }) // { inherit llvmSrc; };
+    passthru = (oldAttrs.passthru or { }) // {
+      inherit llvmSrc;
+    };
 
     doInstallCheck = true;
 
@@ -23,7 +25,8 @@ let
       echo "$versionOutput" | grep -q 'rust-enabled'
     '';
   });
-in lldbDrv.override {
+in
+lldbDrv.override {
   monorepoSrc = llvmSrc;
   libllvm = llvmPackages.libllvm.override { monorepoSrc = llvmSrc; };
 }

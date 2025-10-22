@@ -1,4 +1,8 @@
-{ vimUtils, fetchFromGitHub, lib }:
+{
+  vimUtils,
+  fetchFromGitHub,
+  lib,
+}:
 vimUtils.buildVimPlugin {
   pname = "flutterhelp";
   version = "2024-09-19";

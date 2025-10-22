@@ -1,4 +1,8 @@
-{ vimUtils, fetchFromGitHub, lib }:
+{
+  vimUtils,
+  fetchFromGitHub,
+  lib,
+}:
 vimUtils.buildVimPlugin {
   pname = "llm.nvim";
   version = "2025-01-28";

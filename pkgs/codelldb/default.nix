@@ -1,5 +1,18 @@
-{ lib, stdenv, fetchFromGitHub, rustPlatform, makeWrapper, llvmPackages
-, buildNpmPackage, cmake, nodejs, unzip, python3, pkg-config, libsecret, }:
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  rustPlatform,
+  makeWrapper,
+  llvmPackages,
+  buildNpmPackage,
+  cmake,
+  nodejs,
+  unzip,
+  python3,
+  pkg-config,
+  libsecret,
+}:
 assert lib.versionAtLeast python3.version "3.5";
 let
   publisher = "vadimcn";
@@ -20,25 +33,56 @@ let
   # need to build a custom version of lldb and llvm for enhanced rust support
   lldb = (import ./lldb.nix { inherit fetchFromGitHub llvmPackages; });
 
-  adapter = (import ./adapter.nix {
-    inherit lib lldb makeWrapper rustPlatform stdenv
+  adapter = (
+    import ./adapter.nix {
+      inherit
+        lib
+        lldb
+        makeWrapper
+        rustPlatform
+        stdenv
 
-      pname src version;
-  });
+        pname
+        src
+        version
+        ;
+    }
+  );
 
-  nodeDeps = (import ./node_deps.nix {
-    inherit buildNpmPackage libsecret pkg-config python3
+  nodeDeps = (
+    import ./node_deps.nix {
+      inherit
+        buildNpmPackage
+        libsecret
+        pkg-config
+        python3
 
-      pname src version;
-  });
+        pname
+        src
+        version
+        ;
+    }
+  );
 
-in stdenv.mkDerivation {
+in
+stdenv.mkDerivation {
   pname = "vscode-extension-${publisher}-${pname}";
-  inherit src version vscodeExtUniqueId vscodeExtPublisher vscodeExtName;
+  inherit
+    src
+    version
+    vscodeExtUniqueId
+    vscodeExtPublisher
+    vscodeExtName
+    ;
 
   installPrefix = "share/vscode/extensions/${vscodeExtUniqueId}";
 
-  nativeBuildInputs = [ cmake makeWrapper nodejs unzip ];
+  nativeBuildInputs = [
+    cmake
+    makeWrapper
+    nodejs
+    unzip
+  ];
 
   patches = [ ./patches/cmake-build-extension-only.patch ];
 
@@ -50,7 +94,8 @@ in stdenv.mkDerivation {
 
   postConfigure = ''
     cp -r ${nodeDeps}/lib/node_modules .
-  '' + lib.optionalString stdenv.hostPlatform.isDarwin ''
+  ''
+  + lib.optionalString stdenv.hostPlatform.isDarwin ''
     export HOME="$TMPDIR/home"
     mkdir $HOME
   '';

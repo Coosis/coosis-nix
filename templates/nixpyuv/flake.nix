@@ -1,5 +1,5 @@
 {
-  description = "A flake for python development environment, using nix for python package management.";
+  description = "A flake for python development environment, using uv for python package management.";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -84,6 +84,7 @@
 
               # Other packages you might need in your environment
               # ...
+              uv
             ];
             shellHook = "	export SHELL=$(which zsh)\n	exec zsh\n";
           };

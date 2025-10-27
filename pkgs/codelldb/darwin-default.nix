@@ -10,18 +10,18 @@ let
   system = stdenv.system;
   binaries = {
     "x86_64-darwin" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-x86_64-darwin.vsix";
-      sha256 = "1kzm0hrg6ji2wjxhnsj45g49dq5kll8vb760131k8154f1b0vcci";
+      url = "https://github.com/vadimcn/codelldb/releases/download/v1.11.8/codelldb-darwin-x64.vsix";
+      sha256 = "wY98ZL5LE264WJVJ/TrxLF6Xwt09dJQ9lggD90s5vFE=";
     };
     "aarch64-darwin" = {
-      url = "https://github.com/vadimcn/codelldb/releases/download/v1.10.0/codelldb-aarch64-darwin.vsix";
-      sha256 = "0hbs2rr4r8zlii3srbc9xbmn5wm3p88cdsx85xp2vibbf9d7kc2a";
+      url = "https://github.com/vadimcn/codelldb/releases/download/v1.11.8/codelldb-darwin-arm64.vsix";
+      sha256 = "oQZeNL4/cpVLKWZXghoGxWaodH1JMMLZ67dJFGp1btc=";
     };
   };
 in
 stdenv.mkDerivation {
   pname = "codelldb";
-  version = "1.10.0";
+  version = "1.11.8";
   nativeBuildInputs = [
     unzip
     makeWrapper

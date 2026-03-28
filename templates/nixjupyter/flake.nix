@@ -39,8 +39,8 @@
           python39 = pkgs.python39;
           python310 = pkgs.python310;
           python311 = pkgs.python311;
-          python = pkgs.python3;
-          python313 = pkgs.python313;
+          python312 = pkgs.python3;
+          python = pkgs.python313;
         in
         {
           default = pkgs.mkShell {
